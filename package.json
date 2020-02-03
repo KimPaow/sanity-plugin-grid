@@ -1,7 +1,7 @@
 {
-  "name": "sanity-plugin-color-list",
-  "version": "1.2.1",
-  "description": "A custom input component for displaying an array of color to pick from.",
+  "name": "sanity-plugin-grid",
+  "version": "0.0.0",
+  "description": "A custom input component for displaying an array of grid objects.",
   "main": "index.js",
   "scripts": {
     "build": "babel src -d lib --copy-files",
@@ -13,12 +13,10 @@
   },
   "keywords": [
     "sanity",
-    "colorpicker",
-    "color",
-    "picker",
+    "grid",
     "sanityio",
     "sanity.io",
-    "color-list"
+    "input component"
   ],
   "author": "Kim Björkman",
   "license": "ISC",
@@ -38,6 +36,8 @@
     "babel-preset-react": "6.24.1"
   },
   "dependencies": {
-    "@ctrl/tinycolor": "^2.5.4"
+    "plugin": "^0.3.3",
+    "sanity": "^0.147.0",
+    "tabs": "^0.2.0"
   }
 }
