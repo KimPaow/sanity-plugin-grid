@@ -37,7 +37,8 @@
   },
   "dependencies": {
     "plugin": "^0.3.3",
+    "prop-types": "^15.7.2",
     "sanity": "^0.147.0",
-    "tabs": "^0.2.0"
+    "sanity-plugin-tabs": "file:../../forks/sanity-plugin-tabs"
   }
 }

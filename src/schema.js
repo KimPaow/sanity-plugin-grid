@@ -1,5 +1,5 @@
 import SanityGrid from "../lib";
-import Tabs from "../../components/tabs";
+import Tabs from "sanity-plugin-tabs";
 
 export default {
   title: "Sanity Grid",
@@ -39,14 +39,14 @@ export default {
             }
           ]
         }
-      ],
-      inputComponent: SanityGrid
+      ]
+      // inputComponent: SanityGrid
     },
     // Grid Settings
     {
       title: "Settings",
-      fieldset: "gridsettings",
-      name: "settings",
+      fieldset: "settings",
+      name: "gridsettings",
       type: "object",
       fields: [
         {
