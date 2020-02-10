@@ -7,13 +7,15 @@ export default {
   type: "object",
   inputComponent: Tabs,
   fieldsets: [
-    { name: "content", title: "Content" },
-    { name: "settings", title: "Settings" }
+    { name: "content", title: "Grid Content" },
+    { name: "settings", title: "Grid Settings" }
   ],
+  options: {
+    layout: "object"
+  },
   fields: [
     // Grid Item
     {
-      title: "Content",
       fieldset: "content",
       name: "grid",
       type: "array",
@@ -24,27 +26,44 @@ export default {
           type: "object",
           fields: [
             {
+              title: "Username",
+              name: "username",
+              type: "string"
+            },
+            {
+              title: "Grid Image",
+              name: "gridimg",
+              type: "image"
+            },
+            {
               title: "Grid Column",
               description:
                 "<start-line> / <end-line> | <start-line> / span <value>",
-              name: "grid_column",
+              name: "columns",
               type: "string"
             },
             {
               title: "Grid Row",
               description:
                 "<start-line> / <end-line> | <start-line> / span <value>",
-              name: "grid_row",
+              name: "rows",
               type: "string"
             }
-          ]
+          ],
+          preview: {
+            select: {
+              title: "username",
+              gridCol: "grid_column",
+              gridRow: "grid_row",
+              media: "gridimg"
+            }
+          }
         }
-      ]
-      // inputComponent: SanityGrid
+      ],
+      inputComponent: SanityGrid
     },
     // Grid Settings
     {
-      title: "Settings",
       fieldset: "settings",
       name: "gridsettings",
       type: "object",
@@ -52,13 +71,13 @@ export default {
         {
           title: "Grid Template Columns",
           description: "e.g. repeat(12, 1fr)",
-          name: "template_columns",
+          name: "columns",
           type: "string"
         },
         {
           title: "Grid Template Rows",
           description: "e.g. repeat(12, 1fr)",
-          name: "template_row",
+          name: "rows",
           type: "string"
         }
       ]

@@ -1,0 +1,22 @@
+@import "part:@sanity/base/theme/variables-style";
+
+.value_container {
+  /* padding: var(--small-padding); */
+  background: transparent;
+  /* border-radius: var(--border-radius-medium); */
+  /* border: 1px solid color(var(--default-button-primary-color) a(35%)); */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  margin: 1px;
+
+  /* @nest &:hover {
+    cursor: pointer;
+    background-color: color(var(--default-button-primary-color) a(5%));
+    border: 1px solid color(var(--default-button-primary-color) a(70%));
+  } */
+  @nest &:focus {
+    outline: none;
+  }
+}
