@@ -4,21 +4,43 @@
   display: grid;
   padding-inline-start: 0;
   margin: 0 0 var(--medium-padding) 0;
-  gap: 3px;
+  gap: 5px;
+}
+
+.grid_field_shadow {
+  display: grid;
+  gap: 5px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.grid_field_shadow span {
+  pointer-events: none;
+  background-color: color(var(--brand-primary) a(5%));
+  border-radius: var(--border-radius-small);
 }
 
 .grid_item {
-  padding: 0 0 0 var(--small-padding);
+  z-index: 1;
+  padding: 0;
+  background-color: color(var(--brand-primary) a(55%));
   list-style-type: none !important;
   margin: 0;
   max-width: 100%;
   overflow: hidden;
   border-radius: var(--border-radius-medium);
-  border: 1px solid color(var(--default-button-primary-color) a(35%));
+  border: 1px solid color(var(--brand-primary) a(35%));
+  transition: background-color 0.1s ease;
 
   @nest &:hover {
     cursor: pointer;
-    background-color: color(var(--default-button-primary-color) a(5%));
-    border: 1px solid color(var(--default-button-primary-color) a(70%));
+    background-color: color(var(--brand-primary) a(70%));
+    border: 1px solid color(var(--brand-primary) a(70%));
+    transition: background-color 0.1s ease;
   }
 }

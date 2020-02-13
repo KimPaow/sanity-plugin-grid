@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useEffect, useRef } from "react";
 import fieldsetStyles from "part:@sanity/components/fieldsets/default-style";
 import styles from "./component.css";
 import PropTypes from "prop-types";
@@ -13,19 +13,133 @@ import PatchEvent, {
   setIfMissing,
   unset
 } from "part:@sanity/form-builder/patch-event";
-import { createProtoValue, resolveTypeName, randomKey } from "./utils";
+import { createProtoValue, randomKey, getMemberType } from "./utils";
+import gsap from "gsap";
+import Draggable from "gsap/Draggable";
+
+gsap.registerPlugin(Draggable);
 
 const SanityGrid = forwardRef((props, ref) => {
-  const { level, value, type } = props;
+  const { level, value, type, document } = props;
   const NO_MARKERS = [];
+  const gridRef = useRef(null);
+  const draggableRef = useRef(null);
 
-  console.debug("[SanityGrid] props: ", props);
+  // console.debug("[SanityGrid] props: ", props);
+
+  // We need the number of rows and columns
+  const { rows = 1, columns = 6 } = document.grid || {};
+  let gridDetails = {
+    rowHeight: 0,
+    columnWidth: 0,
+    gap: 5
+  };
+
+  const handleDragEnd = e => {
+    const closestElement = e.target?.closest(`.${styles.grid_item}`);
+
+    if (!closestElement) {
+      console.error("Sanity Grid Input could not find the dragged element.");
+      console.debug(
+        `[Sanity Grid] Handle Drag End - e.target: ${e.target}`,
+        e.target
+      );
+      return;
+    }
+
+    const { rowHeight, columnWidth } = gridDetails;
+    const itemKey = closestElement.dataset.key;
+    const item = value.find(element => {
+      return element._key === itemKey;
+    });
+
+    const gridBounding = gridRef.current.getBoundingClientRect();
+    const elementBounding = closestElement.getBoundingClientRect();
+    const diffs = {
+      x: Math.round(elementBounding.left - gridBounding.left),
+      y: Math.round(elementBounding.top - gridBounding.top)
+    };
+    const pos = {
+      col: Math.round(diffs.x / columnWidth) + 1,
+      row: Math.round(diffs.y / rowHeight) + 1
+    };
+
+    let newItem = { ...item } || {};
+    !newItem.settings ? (newItem.settings = {}) : null;
+    newItem.settings.posX = pos.col;
+    newItem.settings.posY = pos.row;
+
+    const patch = PatchEvent.from(set(newItem));
+
+    closestElement.style.transform = null;
+
+    item && item && handleItemChange(patch, item);
+
+    gsap.set(closestElement, {
+      transform: null,
+      gridColumnStart: pos.col,
+      gridRowStart: pos.row
+    });
+  };
+
+  const createDraggable = () => {
+    draggableRef.current = Draggable.create(`.${styles.grid_item}`, {
+      bounds: gridRef.current,
+      throwProps: true,
+      type: "x,y",
+      liveSnap: {
+        x: value => {
+          return (
+            Math.round(value / gridDetails.columnWidth) *
+            gridDetails.columnWidth
+          );
+        },
+        y: value => {
+          return (
+            Math.round(value / gridDetails.rowHeight) * gridDetails.rowHeight
+          );
+        }
+      },
+      onDragEnd: handleDragEnd
+    });
+  };
+
+  useEffect(() => {
+    let grid = gridRef.current;
+
+    if (!grid) {
+      return;
+    }
+
+    // dimensions with the grid gap included
+    gridDetails.rowHeight = grid.offsetHeight / rows;
+    gridDetails.columnWidth = grid.offsetWidth / columns;
+
+    createDraggable();
+  });
+
+  const handleItemChange = (event, item) => {
+    const { onChange, value, type } = props;
+    const memberType = getMemberType(item, type);
+
+    if (!memberType) {
+      return;
+    }
+    if (memberType.readOnly) {
+      return;
+    }
+    const key = item._key || randomKey(12);
+    onChange(
+      event
+        .prefixAll({ _key: key })
+        .prepend(item._key ? [] : set(key, [value.indexOf(item), "_key"]))
+    );
+  };
 
   const renderGrid = () => {
     const {
       type,
       markers,
-      readOnly,
       value,
       focusPath = [],
       onBlur,
@@ -37,37 +151,7 @@ const SanityGrid = forwardRef((props, ref) => {
 
     if (value === "undefined") return <p>No grid items created yet</p>;
 
-    const getMemberTypeOfItem = item => {
-      const { type } = props;
-      const itemTypeName = resolveTypeName(item);
-      const memberType = type.of.find(
-        memberType => memberType.name === itemTypeName
-      );
-      return memberType;
-    };
-
-    const handleItemChange = (event, item) => {
-      const { onChange, value } = props;
-      const memberType = getMemberTypeOfItem(item);
-      if (!memberType) {
-        // eslint-disable-next-line no-console
-        console.debug(
-          `[renderGrid ] handleItemChange(): Could not find member type of ${item ||
-            "item"}`,
-          item
-        );
-        return;
-      }
-      if (memberType.readOnly) {
-        return;
-      }
-      const key = item._key || randomKey(12);
-      onChange(
-        event
-          .prefixAll({ _key: key })
-          .prepend(item._key ? [] : set(key, [value.indexOf(item), "_key"]))
-      );
-    };
+    const { columns = 6, rows = 1 } = document.grid || {};
 
     const removeItem = item => {
       const { onChange, value } = props;
@@ -80,12 +164,6 @@ const SanityGrid = forwardRef((props, ref) => {
 
     const handleRemoveItem = item => {
       removeItem(item);
-      // const { onChange, value } = this.props;
-      // const e = PatchEvent.from(
-      //   unset(item._key ? [{ _key: item._key }] : [value.indexOf(item)])
-      // );
-      // console.debug("[removeItem]", e);
-      // onChange(e);
     };
 
     // add sortable: false to options to remove itemValue's draghandle
@@ -93,50 +171,69 @@ const SanityGrid = forwardRef((props, ref) => {
       ? Object.assign(type.options, { sortable: false })
       : { sortable: false };
 
-    const gridStyles = {
-      gridTemplateColumns: "repeat(12, 1fr)"
+    const gridStyles = {};
+
+    if (columns) gridStyles.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+    if (rows) gridStyles.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+    const createShadowGrid = (columns, rows) => {
+      let items = [];
+
+      for (let i = 0; i < columns * (rows || 1); i++) {
+        items.push(<span key={i}></span>);
+      }
+      return items;
     };
 
-    const { gridsettings } = document.grid || {};
-    const { columns, rows } = gridsettings || {};
-
-    if (columns) gridStyles.gridTemplateColumns = columns;
-    if (rows) gridStyles.gridTemplateRows = rows;
-
     return (
-      <ul className={styles.grid_field} style={gridStyles}>
-        {value &&
-          value.map(item => {
-            const isChildMarker = marker =>
-              startsWith([index], marker.path) ||
-              startsWith([{ _key: item && item._key }], marker.path);
-            const childMarkers = markers.filter(isChildMarker);
+      <>
+        <ul ref={gridRef} className={styles.grid_field} style={gridStyles}>
+          {value
+            ? value.map((item, i) => {
+                const isChildMarker = marker =>
+                  startsWith([index], marker.path) ||
+                  startsWith([{ _key: item && item._key }], marker.path);
+                const childMarkers = markers?.filter(isChildMarker);
+                const { width, height, posX, posY } = item.settings || {};
 
-            return (
-              <li
-                className={styles.grid_item}
-                key={item._key}
-                style={{ gridColumn: item.columns, gridRow: item.rows }}
-              >
-                <RenderItemValue
-                  type={type}
-                  value={item}
-                  level={level}
-                  markers={
-                    childMarkers.length === 0 ? NO_MARKERS : childMarkers
-                  }
-                  onRemove={handleRemoveItem}
-                  onChange={handleItemChange}
-                  focusPath={focusPath}
-                  filterField={filterField}
-                  onFocus={onFocus}
-                  onBlur={onBlur}
-                  readOnly={readOnly}
-                />
-              </li>
-            );
-          })}
-      </ul>
+                return (
+                  <li
+                    className={styles.grid_item}
+                    key={item._key || i}
+                    style={{
+                      gridColumnStart: posX || "auto",
+                      gridColumnEnd: width ? `span ${width}` : "auto",
+                      gridRowStart: posY || "auto",
+                      gridRowEnd: height ? `span ${height}` : "auto"
+                    }}
+                    data-posx={posX}
+                    data-posy={posY}
+                    data-key={item._key}
+                  >
+                    <RenderItemValue
+                      type={type}
+                      value={item}
+                      level={level}
+                      markers={
+                        childMarkers?.length === 0 ? NO_MARKERS : childMarkers
+                      }
+                      onRemove={handleRemoveItem}
+                      onChange={handleItemChange}
+                      focusPath={focusPath}
+                      filterField={filterField}
+                      onFocus={onFocus}
+                      onBlur={onBlur}
+                      readOnly={props.readOnly}
+                    />
+                  </li>
+                );
+              })
+            : null}
+          <div className={`${styles.grid_field_shadow}`} style={gridStyles}>
+            {createShadowGrid(columns || 6, rows || 1)}
+          </div>
+        </ul>
+      </>
     );
   };
 
@@ -146,22 +243,12 @@ const SanityGrid = forwardRef((props, ref) => {
       setIfMissing([]),
       insert([itemValue], position, [atIndex])
     );
-    console.debug("[append]", e);
     onChange(e);
   };
 
-  const handleAppend = (value, valuePatchEvent) => {
-    console.debug("[SanityGrid] handle append - value: ", value);
-    console.debug(
-      "[SanityGrid] handle append - valuePatchEvent: ",
-      valuePatchEvent
-    );
+  const handleAppend = value => {
     append(value, "after", -1);
   };
-
-  // props.onChange(
-  //   PatchEvent.from(unset(value._key ? [{ _key: value._key }] : null))
-  // );
 
   return (
     <div ref={ref} key="SANITY_GRID_INPUT">
@@ -173,10 +260,8 @@ const SanityGrid = forwardRef((props, ref) => {
       <ArrayFunctions
         type={type}
         value={value}
-        // readOnly={readOnly}
+        readOnly={props.readOnly}
         onAppendItem={handleAppend}
-        // onPrependItem={this.handlePrepend}
-        // onFocusItem={this.handleFocusItem}
         onCreateValue={createProtoValue}
         // onChange={onChange}
       />

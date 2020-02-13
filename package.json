@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "get-random-values": "^1.2.0",
+    "gsap": "^3.1.1",
     "plugin": "^0.3.3",
     "prop-types": "^15.7.2",
     "sanity": "^0.147.0",

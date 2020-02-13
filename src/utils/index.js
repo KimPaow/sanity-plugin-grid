@@ -30,4 +30,9 @@ export function resolveTypeName(value) {
   return (jsType === "object" && "_type" in value && value._type) || jsType;
 }
 
+export const getMemberType = (value, type) => {
+  const itemTypeName = resolveTypeName(value);
+  return type.of.find(memberType => memberType.name === itemTypeName);
+};
+
 export const randomKey = RandomKey;

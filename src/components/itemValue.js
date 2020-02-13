@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import DefaultDialog from "part:@sanity/components/dialogs/default";
 import DialogContent from "part:@sanity/components/dialogs/content";
 import { FormBuilderInput } from "part:@sanity/form-builder";
-import Preview from "@sanity/form-builder/lib/Preview";
+// import Preview from "@sanity/form-builder/lib/Preview";
 import DefaultPreview from "part:@sanity/components/previews/default";
-import { resolveTypeName } from "../utils";
+import { getMemberType } from "../utils";
 import styles from "./itemValue.css";
 
 const CLOSE_ACTION = {
@@ -24,7 +24,7 @@ const DELETE_ACTION = {
 };
 
 const RenderItemValue = props => {
-  const { value, markers, type, readOnly } = props;
+  const { value } = props;
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleEditStart = () => {
@@ -52,14 +52,8 @@ const RenderItemValue = props => {
     }
   };
 
-  const getMemberType = () => {
-    const { value, type } = props;
-    const itemTypeName = resolveTypeName(value);
-    return type.of.find(memberType => memberType.name === itemTypeName);
-  };
-
   // The types object
-  const memberType = getMemberType();
+  const memberType = getMemberType(props.value, props.type);
 
   // For editing in the griditem obj in a popup
   const renderEditItemForm = item => {
@@ -79,6 +73,7 @@ const RenderItemValue = props => {
     }
 
     const handleChange = event => {
+      console.log("[itemValue] handleChange event: ", event);
       const { onChange, value } = props;
       onChange(event, value);
     };
@@ -94,7 +89,7 @@ const RenderItemValue = props => {
         onFocus={onFocus}
         onBlur={onBlur}
         focusPath={focusPath}
-        readOnly={readOnly || memberType.readOnly}
+        readOnly={readOnly || memberType?.readOnly}
         markers={childMarkers}
         path={[{ _key: item._key }]}
         filterField={filterField}
@@ -112,7 +107,7 @@ const RenderItemValue = props => {
       <DefaultDialog
         onClose={handleEditStop}
         key={item._key}
-        title={`Edit ${memberType.title}`}
+        title={`Edit ${memberType?.title}`}
         actions={actions}
         onAction={handleDialogAction}
         showCloseButton={false}
@@ -124,8 +119,8 @@ const RenderItemValue = props => {
     );
   };
 
-  const buildPreview = (value, prepare, select) => {
-    let selectEntries = Object.entries(select);
+  const buildPreviewValues = (value, select, prepare) => {
+    let selectEntries = select ? Object.entries(select) : [];
     let preview = {};
 
     for (let i = 0; i < selectEntries.length; i++) {
@@ -139,10 +134,8 @@ const RenderItemValue = props => {
   };
 
   const renderItem = () => {
-    const { prepare, select } = memberType.preview;
-    const previewValues = buildPreview(value, prepare, select);
-
-    console.log("previewValues", previewValues);
+    const { prepare, select } = memberType?.preview || {};
+    const previewValues = buildPreviewValues(value, select, prepare);
 
     return (
       <div
