@@ -1,24 +1,26 @@
 @import "part:@sanity/base/theme/variables-style";
 
 .value_container {
-  /* padding: var(--small-padding); */
   background-color: transparent;
-  /* border-radius: var(--border-radius-medium); */
-  /* border: 1px solid color(var(--default-button-primary-color) a(35%)); */
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
   max-width: 100%;
   height: 100%;
   margin: 1px;
-  padding: 0 0 0 var(--small-padding);
+  padding: var(--small-padding);
 
   /* @nest &:hover {
     cursor: pointer;
     background-color: color(var(--default-button-primary-color) a(5%));
     border: 1px solid color(var(--default-button-primary-color) a(70%));
   } */
+
   @nest &:focus {
     outline: none;
   }
+}
+
+.value_container img {
+  border-radius: 50%;
 }

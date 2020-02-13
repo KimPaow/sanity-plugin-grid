@@ -28,7 +28,7 @@ const SanityGrid = forwardRef((props, ref) => {
   const colFallback = 6,
     rowFallback = 1;
 
-  const { columns = rowFallback, columns = colFallback } = document.grid || {};
+  const { rows = rowFallback, columns = colFallback } = document.grid || {};
 
   let gridDetails = {
     rowHeight: 0,
@@ -193,9 +193,6 @@ const SanityGrid = forwardRef((props, ref) => {
     type.options = type.options
       ? Object.assign(type.options, { sortable: false })
       : { sortable: false };
-
-    const { columns = colFallback, columns = rowFallback } =
-      document.grid || {};
 
     const gridStyles = {};
     gridStyles.gridTemplateColumns = `repeat(${columns}, 1fr)`;

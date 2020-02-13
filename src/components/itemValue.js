@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import DefaultDialog from "part:@sanity/components/dialogs/default";
 import DialogContent from "part:@sanity/components/dialogs/content";
 import { FormBuilderInput } from "part:@sanity/form-builder";
-// import Preview from "@sanity/form-builder/lib/Preview";
+import Preview from "@sanity/form-builder/lib/Preview";
 import DefaultPreview from "part:@sanity/components/previews/default";
 import { getMemberType } from "../utils";
 import styles from "./itemValue.css";
@@ -143,8 +143,8 @@ const RenderItemValue = props => {
         tabIndex={0}
         onClick={value._key && handleEditStart}
       >
-        {/* <Preview layout={"default"} value={value} type={memberType} /> */}
-        <DefaultPreview {...previewValues} media={false} />
+        <Preview layout={"default"} value={value} type={memberType} />
+        {/* <DefaultPreview {...previewValues} media={false} /> */}
       </div>
     );
   };

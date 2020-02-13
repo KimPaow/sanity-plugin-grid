@@ -61,8 +61,8 @@ export default {
   type: "object",
   inputComponent: Tabs,
   fieldsets: [
-    { name: "content", title: "Grid Content" },
-    { name: "settings", title: "Grid Settings" }
+    { name: "content", title: "Content" },
+    { name: "settings", title: "Settings" }
   ],
   options: {
     layout: "object"
