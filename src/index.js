@@ -16,6 +16,7 @@ import PatchEvent, {
 import { createProtoValue, randomKey, getMemberType } from "./utils";
 import gsap from "gsap";
 import Draggable from "gsap/Draggable";
+import useEventListener from "./utils/hooks/useEventListener";
 
 gsap.registerPlugin(Draggable);
 
@@ -24,11 +25,11 @@ const SanityGrid = forwardRef((props, ref) => {
   const NO_MARKERS = [];
   const gridRef = useRef(null);
   const draggableRef = useRef(null);
+  const colFallback = 6,
+    rowFallback = 1;
 
-  // console.debug("[SanityGrid] props: ", props);
+  const { columns = rowFallback, columns = colFallback } = document.grid || {};
 
-  // We need the number of rows and columns
-  const { rows = 1, columns = 6 } = document.grid || {};
   let gridDetails = {
     rowHeight: 0,
     columnWidth: 0,
@@ -104,7 +105,7 @@ const SanityGrid = forwardRef((props, ref) => {
     });
   };
 
-  useEffect(() => {
+  const updateGridDetails = () => {
     let grid = gridRef.current;
 
     if (!grid) {
@@ -114,7 +115,16 @@ const SanityGrid = forwardRef((props, ref) => {
     // dimensions with the grid gap included
     gridDetails.rowHeight = grid.offsetHeight / rows;
     gridDetails.columnWidth = grid.offsetWidth / columns;
+  };
 
+  const handleResize = () => {
+    updateGridDetails();
+  };
+
+  useEventListener("resize", handleResize);
+
+  useEffect(() => {
+    updateGridDetails();
     createDraggable();
   });
 
@@ -128,12 +138,27 @@ const SanityGrid = forwardRef((props, ref) => {
     if (memberType.readOnly) {
       return;
     }
+
     const key = item._key || randomKey(12);
+
     onChange(
       event
         .prefixAll({ _key: key })
         .prepend(item._key ? [] : set(key, [value.indexOf(item), "_key"]))
     );
+  };
+
+  const append = (itemValue, position, atIndex) => {
+    const { onChange } = props;
+    const e = PatchEvent.from(
+      setIfMissing([]),
+      insert([itemValue], position, [atIndex])
+    );
+    onChange(e);
+  };
+
+  const handleAppend = value => {
+    append(value, "after", -1);
   };
 
   const renderGrid = () => {
@@ -150,8 +175,6 @@ const SanityGrid = forwardRef((props, ref) => {
     } = props;
 
     if (value === "undefined") return <p>No grid items created yet</p>;
-
-    const { columns = 6, rows = 1 } = document.grid || {};
 
     const removeItem = item => {
       const { onChange, value } = props;
@@ -171,10 +194,12 @@ const SanityGrid = forwardRef((props, ref) => {
       ? Object.assign(type.options, { sortable: false })
       : { sortable: false };
 
-    const gridStyles = {};
+    const { columns = colFallback, columns = rowFallback } =
+      document.grid || {};
 
-    if (columns) gridStyles.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-    if (rows) gridStyles.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    const gridStyles = {};
+    gridStyles.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+    gridStyles.gridTemplateRows = `repeat(${rows}, 1fr)`;
 
     const createShadowGrid = (columns, rows) => {
       let items = [];
@@ -193,7 +218,9 @@ const SanityGrid = forwardRef((props, ref) => {
                 const isChildMarker = marker =>
                   startsWith([index], marker.path) ||
                   startsWith([{ _key: item && item._key }], marker.path);
+
                 const childMarkers = markers?.filter(isChildMarker);
+
                 const { width, height, posX, posY } = item.settings || {};
 
                 return (
@@ -235,19 +262,6 @@ const SanityGrid = forwardRef((props, ref) => {
         </ul>
       </>
     );
-  };
-
-  const append = (itemValue, position, atIndex) => {
-    const { onChange } = props;
-    const e = PatchEvent.from(
-      setIfMissing([]),
-      insert([itemValue], position, [atIndex])
-    );
-    onChange(e);
-  };
-
-  const handleAppend = value => {
-    append(value, "after", -1);
   };
 
   return (
