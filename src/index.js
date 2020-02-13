@@ -201,7 +201,7 @@ const SanityGrid = forwardRef((props, ref) => {
     gridStyles.gridTemplateColumns = `repeat(${columns}, 1fr)`;
     gridStyles.gridTemplateRows = `repeat(${rows}, 1fr)`;
 
-    const createShadowGrid = (columns, rows) => {
+    const renderShadowGrid = (columns, rows) => {
       let items = [];
 
       for (let i = 0; i < columns * (rows || 1); i++) {
@@ -257,7 +257,7 @@ const SanityGrid = forwardRef((props, ref) => {
               })
             : null}
           <div className={`${styles.grid_field_shadow}`} style={gridStyles}>
-            {createShadowGrid(columns || 6, rows || 1)}
+            {renderShadowGrid(columns || 6, rows || 1)}
           </div>
         </ul>
       </>
