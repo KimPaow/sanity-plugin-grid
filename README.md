@@ -8,8 +8,8 @@ DISCLAIMER: This is still in beta. At the moment it depends on Azzlack's Tabs pl
 
 ## Installation
 
-1. `sanity install grid`
-2. `sanity install tabs`
+1. `sanity install tabs`
+2. `sanity install grid`
 3. In your schema:
 
 ```js
