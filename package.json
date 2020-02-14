@@ -2,28 +2,30 @@
   "name": "sanity-plugin-grid",
   "version": "0.0.0",
   "description": "A custom input component for displaying an array of grid objects.",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "build": "babel src -d lib --copy-files",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/KimPaow/sanity-color-list.git"
+    "url": "git+https://github.com/KimPaow/sanity-plugin-grid.git"
   },
   "keywords": [
     "sanity",
     "grid",
     "sanityio",
     "sanity.io",
-    "input component"
+    "input component",
+    "array",
+    "array input component"
   ],
   "author": "Kim Björkman",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/KimPaow/sanity-color-list/issues"
+    "url": "https://github.com/KimPaow/sanity-plugin-grid/issues"
   },
-  "homepage": "https://github.com/KimPaow/sanity-color-list#readme",
+  "homepage": "https://github.com/KimPaow/sanity-plugin-grid#readme",
   "peerDependencies": {
     "@sanity/form-builder": "^0.144.0",
     "@sanity/components": "^0.144.0",
@@ -44,7 +46,6 @@
     "gsap": "^3.1.1",
     "plugin": "^0.3.3",
     "prop-types": "^15.7.2",
-    "sanity": "^0.147.0",
-    "sanity-plugin-tabs": "file:../../forks/sanity-plugin-tabs"
+    "sanity": "^0.147.0"
   }
 }

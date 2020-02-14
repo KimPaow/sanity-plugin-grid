@@ -1,58 +1,77 @@
-# Sanity Color List
+# Sanity Grid
 
-Display colors for editors to choose from with this custom input component.
+This is a custom input component for arrays. It allows you to display your array items inside a css grid.
 
-![preview image](https://github.com/KimPaow/sanity-color-picker/raw/master/src/images/preview.png)
+DISCLAIMER: This is still in beta. At the moment it depends on Azzlack's Tabs plugin, I plan to make this work on it's own as well eventually.
+
+![preview image](/src/images/preview.png)
 
 ## Installation
 
-1. `sanity install color-list`
-2. In your schema:
+1. `sanity install grid`
+2. `sanity install tabs`
+3. In your schema:
 
 ```js
+import SanityGrid, { basic } from "sanity-plugin-grid/lib";
+import Tabs from "sanity-plugin-tabs";
+
+const customItemFields = [
+  // These are your optional custom fields
+  {
+    title: "Username",
+    name: "username",
+    type: "string"
+  },
+  {
+    title: "Profile Photo",
+    name: "userimg",
+    type: "image"
+  }
+];
+
 ...,
 {
-  title: "Color List",
-  description: "Pick a color",
-  name: "colorlist",
-  type: "colors", // required
-  options: {
-    borderradius: {
-      outer: "100%",
-      inner: "100%"
+  title: "Sanity Grid",
+  name: "sanitygrid",
+  type: "object",
+  inputComponent: Tabs,
+  fieldsets: [
+    { name: "content", title: "Content" },
+    { name: "settings", title: "Settings" } // dont change name unless you plan to implement your own basic.settings
+  ],
+  fields: [
+    // Grid Item
+    {
+      fieldset: "content",
+      name: "grid",
+      type: "array",
+      of: [
+        {
+          title: "Grid Item",
+          name: "griditem",
+          type: "object",
+          fields: [
+            ...customItemFields,
+            {
+              name: "settings",
+              type: "object",
+              fields: [...basic.item]
+            }
+          ],
+          preview: {
+            select: {
+              title: "username",
+              media: "userimg"
+            }
+          }
+        }
+      ],
+      inputComponent: SanityGrid
     },
-    list: [
-      { title: "Yellow", value: "rgba(245, 199, 1, 0.5)" },
-      { title: "Pink", value: {r: 246, g: 206, b: 219} },
-      { title: "Red", value: "#f16d70" },
-      { title: "Teal", value: "#88c6db" },
-      { title: "Purple", value: "#aca0cc" },
-      { title: "Green", value: "#bdcdcb" },
-      { title: "White", value: "white" }
-    ]
-  }
+    // Grid Settings
+    ...basic.settings
+  ]
 },
 ...
 ```
-
-Done. The component returns the selected value. If your value was an object it will return an rgb string instead.
-
-## Options
-This plugin offers some ways of customization via the options object. If you don't use an off-white theme in your studio the defaults should work well out of the box.
-
-```js 
-{string} [background="white"] // If you are using a theme with a non-white bg use this to inform the plugin of this non-white background color so that contrasts can be calculated properly
-{object} [borderradius]
-{string} [borderradius.outer="100%"] // Borderradius for the active decorator
-{string} [borderradius.inner="100%"] // Borderradius for the main item
-{number} [contrastcutoff=20] // 0-255. When the contrast between the background and the color falls below this level decorate the item with a lighter/darker value for better contrast
-{number} [darken=10] // How much darker than the actual color the decoration color will be
-{number} [lighten=10] // How much lighter than the actual color the decoration color will be
-{object} list
-{string} list.title
-{string || object} list.value // can be an object with keys for r, g and b or a valid color string. 0x formatted hex strings are not supported at the moment.
-```
-
-## Changelog
-
-[See the changelog here.](https://github.com/KimPaow/sanity-color-picker/raw/master/CHANGELOG.md)

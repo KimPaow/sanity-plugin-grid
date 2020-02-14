@@ -10,12 +10,6 @@
   margin: 1px;
   padding: var(--small-padding);
 
-  /* @nest &:hover {
-    cursor: pointer;
-    background-color: color(var(--default-button-primary-color) a(5%));
-    border: 1px solid color(var(--default-button-primary-color) a(70%));
-  } */
-
   @nest &:focus {
     outline: none;
   }

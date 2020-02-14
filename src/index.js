@@ -5,7 +5,6 @@ import PropTypes from "prop-types";
 import ArrayFunctions from "part:@sanity/form-builder/input/array/functions";
 import { withDocument } from "part:@sanity/form-builder";
 import RenderItemValue from "./components/itemValue";
-// import RenderItemValue from "@sanity/form-builder/lib/inputs/ArrayInput/ItemValue";
 import { startsWith } from "@sanity/util/paths";
 import PatchEvent, {
   insert,
@@ -26,9 +25,11 @@ const SanityGrid = forwardRef((props, ref) => {
   const gridRef = useRef(null);
   const draggableRef = useRef(null);
   const colFallback = 6,
-    rowFallback = 1;
+    rowFallback = 4;
 
-  const { rows = rowFallback, columns = colFallback } = document.grid || {};
+  const { rows = rowFallback, columns = colFallback } =
+    document.sanitygrid || {};
+  console.debug("[ Grid ] - props: ", props);
 
   let gridDetails = {
     rowHeight: 0,
@@ -84,21 +85,20 @@ const SanityGrid = forwardRef((props, ref) => {
   };
 
   const createDraggable = () => {
+    const snap = (value, snapTo) => {
+      return Math.round(value / snapTo) * snapTo;
+    };
+
     draggableRef.current = Draggable.create(`.${styles.grid_item}`, {
       bounds: gridRef.current,
       throwProps: true,
       type: "x,y",
       liveSnap: {
         x: value => {
-          return (
-            Math.round(value / gridDetails.columnWidth) *
-            gridDetails.columnWidth
-          );
+          return snap(value, gridDetails.columnWidth);
         },
         y: value => {
-          return (
-            Math.round(value / gridDetails.rowHeight) * gridDetails.rowHeight
-          );
+          return snap(value, gridDetails.rowHeight);
         }
       },
       onDragEnd: handleDragEnd
@@ -170,8 +170,7 @@ const SanityGrid = forwardRef((props, ref) => {
       onBlur,
       onFocus,
       level,
-      filterField,
-      document
+      filterField
     } = props;
 
     if (value === "undefined") return <p>No grid items created yet</p>;
@@ -188,11 +187,6 @@ const SanityGrid = forwardRef((props, ref) => {
     const handleRemoveItem = item => {
       removeItem(item);
     };
-
-    // add sortable: false to options to remove itemValue's draghandle
-    type.options = type.options
-      ? Object.assign(type.options, { sortable: false })
-      : { sortable: false };
 
     const gridStyles = {};
     gridStyles.gridTemplateColumns = `repeat(${columns}, 1fr)`;
@@ -230,9 +224,6 @@ const SanityGrid = forwardRef((props, ref) => {
                       gridRowStart: posY || "auto",
                       gridRowEnd: height ? `span ${height}` : "auto"
                     }}
-                    data-posx={posX}
-                    data-posy={posY}
-                    data-key={item._key}
                   >
                     <RenderItemValue
                       type={type}
@@ -290,4 +281,46 @@ const SanityGrid = forwardRef((props, ref) => {
 //   onChange: PropTypes.func.isRequired
 // };
 
+export let basic = {
+  settings: [
+    {
+      title: "Columns",
+      name: "columns",
+      fieldset: "settings",
+      type: "number"
+    },
+    {
+      title: "Rows",
+      name: "rows",
+      fieldset: "settings",
+      type: "number"
+    }
+  ],
+  item: [
+    {
+      title: "Width",
+      description: "Width in number of columns.",
+      name: "width",
+      type: "number"
+    },
+    {
+      title: "Height",
+      description: "Height in number of rows.",
+      name: "height",
+      type: "number"
+    },
+    {
+      title: "Column",
+      description: "What column to position the item at.",
+      name: "posX",
+      type: "number"
+    },
+    {
+      title: "Row",
+      description: "What row to position the item at.",
+      name: "posY",
+      type: "number"
+    }
+  ]
+};
 export default withDocument(SanityGrid);
