@@ -1,6 +1,6 @@
 {
   "name": "sanity-plugin-grid",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A custom input component for displaying an array of grid objects.",
   "main": "lib/index.js",
   "scripts": {
